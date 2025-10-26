@@ -1,0 +1,21 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: products-service-redis-project
+  datasource:
+    url: jdbc:postgresql://localhost:5432/Products
+    username: postgres
+    password: postgres
+    hikari:
+      maximum-pool-size: 20
+  jpa:
+    show-sql:
+      true
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate.jdbc.batch_size: 100
+      hibernate.default_schema: public
+    open-in-view: false
