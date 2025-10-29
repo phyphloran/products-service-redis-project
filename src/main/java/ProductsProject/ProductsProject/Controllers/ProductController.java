@@ -4,14 +4,15 @@ package ProductsProject.ProductsProject.Controllers;
 import ProductsProject.ProductsProject.DTO.ProductDto;
 import ProductsProject.ProductsProject.Requests.ProductCreateRequest;
 import ProductsProject.ProductsProject.Requests.ProductUpdateRequest;
+import ProductsProject.ProductsProject.Services.ProductService;
 import ProductsProject.ProductsProject.Services.ProductServiceImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 
 @Slf4j
@@ -20,14 +21,14 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/product")
 public class ProductController {
 
-    private final ProductServiceImpl productService;
+    private final ProductService productService;
 
     @GetMapping
-    public ResponseEntity<Page<ProductDto>> getAllProducts(
+    public ResponseEntity<List<ProductDto>> getAllProducts(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        Page<ProductDto> productDtoPage = productService.getAllProductsDto(page, size);
+        List<ProductDto> productDtoPage = productService.getAllProductsDto(page, size);
         return ResponseEntity.ok(productDtoPage);
     }
 
