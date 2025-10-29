@@ -9,10 +9,15 @@ import ProductsProject.ProductsProject.Requests.ProductCreateRequest;
 import ProductsProject.ProductsProject.Requests.ProductUpdateRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Slf4j
@@ -31,17 +36,14 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Cacheable(value = "product", key = "#id", cacheManager = "product")
     public ProductDto getProductDtoById(Long id) {
-        ProductEntity productEntity = getById(id);
-        ProductDto productDto = productDtoMapper.toProductDto(productEntity);
-        return productDto;
+        return productDtoMapper.toProductDto(getById(id));
     }
 
     @Override
-    public Page<ProductDto> getAllProductsDto(
-            int page,
-            int size
-    ) {
+    @Cacheable(value = "products", key = "'page_' + #page + '_size_' + #size", cacheManager = "products")
+    public List<ProductDto> getAllProductsDto(int page, int size) {
         String sort = "id";
         Page<ProductEntity> allProducts = productRepository.findAll(
                 PageRequest.of(
@@ -50,14 +52,14 @@ public class ProductServiceImpl implements ProductService {
                         Sort.by(Sort.Direction.DESC, sort)
                 )
         );
-        Page<ProductDto> allProductsDto = allProducts
-                .map(
-                productEntity -> productDtoMapper.toProductDto(productEntity)
-                );
-        return allProductsDto;
+
+        return allProducts.getContent().stream()
+                .map(productDtoMapper::toProductDto)
+                .collect(Collectors.toList());
     }
 
     @Override
+    @CacheEvict(value = "products", allEntries = true, cacheManager = "products")
     public ProductDto create(ProductCreateRequest productCreateRequest) {
         log.info("Creating product with name {}", productCreateRequest.name());
         ProductEntity productEntity = ProductEntity.builder()
@@ -70,6 +72,10 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = "product", key = "#id", cacheManager = "product"),
+            @CacheEvict(value = "products", allEntries = true, cacheManager = "products")
+    })
     public ProductDto update(Long id, ProductUpdateRequest productUpdateRequest) {
         log.info("Updated product with name {}", productUpdateRequest.name());
         ProductEntity productEntity = getById(id);
@@ -81,6 +87,10 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = "product", key = "#id", cacheManager = "product"),
+            @CacheEvict(value = "products", allEntries = true, cacheManager = "products")
+    })
     public void delete(Long id) {
         if (!productRepository.existsById(id)) {
             throw new RuntimeException("Product not found: " + id);
