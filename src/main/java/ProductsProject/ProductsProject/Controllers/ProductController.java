@@ -5,7 +5,6 @@ import ProductsProject.ProductsProject.DTO.ProductDto;
 import ProductsProject.ProductsProject.Requests.ProductCreateRequest;
 import ProductsProject.ProductsProject.Requests.ProductUpdateRequest;
 import ProductsProject.ProductsProject.Services.ProductService;
-import ProductsProject.ProductsProject.Services.ProductServiceImpl;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,7 +43,7 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.CREATED).body(productDto);
     }
 
-    @PatchMapping("/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<ProductDto> updateProduct(
             @PathVariable("id") Long id,
             @RequestBody @Valid ProductUpdateRequest productUpdateRequest
