@@ -23,10 +23,5 @@ spring:
     redis:
       host: 127.0.0.1
       port: 6379
-#      password: ${SPRING_REDIS_PASSWORD:}
-#      username: ${SPRING_REDIS_USERNAME:}
-      ssl:
-        enabled: ${SPRING_REDIS_SSL_ENABLED:false}
-        bundle: ${SPRING_REDIS_SSL_BUNDLE:}
   cache:
     type: redis
