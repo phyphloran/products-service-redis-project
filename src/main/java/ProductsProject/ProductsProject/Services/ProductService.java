@@ -10,9 +10,13 @@ import java.util.List;
 public interface ProductService {
 
     ProductDto getProductDtoById(Long id);
+
     List<ProductDto> getAllProductsDto(int page, int size);
+
     ProductDto create(ProductCreateRequest productCreateRequest);
+
     ProductDto update(Long id, ProductUpdateRequest productUpdateRequest);
+
     void delete(Long id);
 
 }

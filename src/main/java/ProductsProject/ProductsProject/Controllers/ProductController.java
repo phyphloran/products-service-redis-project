@@ -8,8 +8,8 @@ import ProductsProject.ProductsProject.Services.ProductService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -18,13 +18,17 @@ import java.util.List;
 
 
 @Slf4j
-@RestController
-@RequiredArgsConstructor
-@RequestMapping("/api/product")
 @Validated
+@RestController
+@RequestMapping("/api/product")
 public class ProductController {
 
     private final ProductService productService;
+
+    //2 realization: productWithProductPhotosServiceImpl and productServiceImpl
+    public ProductController(@Qualifier("productWithProductPhotosServiceImpl") ProductService productService) {
+        this.productService = productService;
+    }
 
     @GetMapping
     public ResponseEntity<List<ProductDto>> getAllProducts(
