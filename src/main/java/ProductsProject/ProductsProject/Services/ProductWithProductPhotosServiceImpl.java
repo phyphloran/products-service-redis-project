@@ -11,13 +11,14 @@ import ProductsProject.ProductsProject.Requests.ProductUpdateRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.context.annotation.Primary;
-import org.springframework.data.domain.Page;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 
@@ -31,43 +32,89 @@ public class ProductWithProductPhotosServiceImpl implements ProductService {
     private final ProductDtoMapper productDtoMapper;
 
     private ProductEntity getById(Long id) {
-        ProductEntity productEntity = productRepository.findByIdWithProductPhotos(id)
+        ProductEntity productEntity = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product with id " + id + " not found"));
         return productEntity;
     }
 
     @Override
-    //    @Cacheable(value = "product", key = "#id", cacheManager = "product")
+    @Transactional
+    @Cacheable(value = "product", key = "#id", cacheManager = "product")
     public ProductDto getProductDtoById(Long id) {
         return productDtoMapper.toProductDtoWithProductPhotos(getById(id));
     }
 
     @Override
-//    @Cacheable(value = "products", key = "'page_' + #page + '_size_' + #size", cacheManager = "products")
-    public List<ProductDto> getAllProductsDto(int page, int size) {
-        String sort = "id";
-        Page<Long> ids = productRepository.findProductIds(
-                PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, sort))
-        );
-        List<ProductEntity> productEntities = productRepository.findProductWithProductPhotos(ids.getContent());
+    @Transactional
+    @Cacheable(value = "products", key = "'page_' + #id", cacheManager = "products")
+    public List<ProductDto> getAllProductsDto(Long id) {
+        List<Long> ids = productRepository.findProductIdsByPage(id, PageRequest.of(0, 10));
+        if (ids.isEmpty())  {
+            return Collections.emptyList();
+        }
+
+        List<ProductEntity> productEntities = productRepository.findProductsWithPhotosByIds(ids);
+
         return productEntities.stream()
                 .map(productEntity -> productDtoMapper.toProductDtoWithProductPhotos(productEntity))
                 .collect(Collectors.toList());
     }
 
     @Override
+    @Transactional
+    @CacheEvict(value = "products", allEntries = true, cacheManager = "products")
     public ProductDto create(ProductCreateRequest productCreateRequest) {
-        return null;
+        ProductEntity productEntity = new ProductEntity();
+        productEntity.setName(productCreateRequest.name());
+        productEntity.setPrice(productCreateRequest.price());
+        productEntity.setDescription(productCreateRequest.description());
+
+        List<ProductPhotoEntity> photos = productCreateRequest.productPhotosUrl()
+                .stream()
+                .map(url -> productDtoMapper.toPhotoEntity(url, productEntity))
+                .collect(Collectors.toList());
+
+        productEntity.setProductPhotos(photos);
+
+        return productDtoMapper.toProductDtoWithProductPhotos(productRepository.save(productEntity));
     }
 
     @Override
+    @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "product", key = "#id", cacheManager = "product"),
+            @CacheEvict(value = "products", allEntries = true, cacheManager = "products")
+    })
     public ProductDto update(Long id, ProductUpdateRequest productUpdateRequest) {
-        return null;
+        ProductEntity productEntity = getById(id);
+
+        productEntity.setName(productUpdateRequest.name());
+        productEntity.setPrice(productUpdateRequest.price());
+        productEntity.setDescription(productUpdateRequest.description());
+
+        List<ProductPhotoEntity> productPhotoEntity = productEntity.getProductPhotos();
+        Map<Long, String> newMap = productUpdateRequest.photoToUpdateMap();
+
+        if (newMap != null && !newMap.isEmpty()) {
+            productPhotoEntity.forEach(photo -> {
+                String newUrl = newMap.get(photo.getId());
+                if (newUrl != null && !newUrl.isBlank()) {
+                    photo.setPhotoUrl(newUrl);
+                }
+            });
+        }
+
+        return productDtoMapper.toProductDtoWithProductPhotos(productRepository.save(productEntity));
     }
 
     @Override
+    @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "product", key = "#id", cacheManager = "product"),
+            @CacheEvict(value = "products", key = "'page_' + #id", cacheManager = "products")
+    })
     public void delete(Long id) {
-
+        productRepository.deleteById(id);
     }
 
 }

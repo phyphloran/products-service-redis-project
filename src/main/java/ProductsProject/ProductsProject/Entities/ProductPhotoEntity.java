@@ -17,7 +17,7 @@ public class ProductPhotoEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    private Long id;
 
     @Column(name = "photo_url")
     private String photoUrl;

@@ -6,7 +6,6 @@ import ProductsProject.ProductsProject.Requests.ProductCreateRequest;
 import ProductsProject.ProductsProject.Requests.ProductUpdateRequest;
 import ProductsProject.ProductsProject.Services.ProductService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -32,10 +31,9 @@ public class ProductController {
 
     @GetMapping
     public ResponseEntity<List<ProductDto>> getAllProducts(
-            @RequestParam(defaultValue = "0") @Min(value = 0, message = "Incorrect value of page") int page,
-            @RequestParam(defaultValue = "10") @Min(value = 1, message = "Min value must be more than 20") @Max(value = 20, message = "Max value must be less than 0") int size
+            @RequestParam(defaultValue = "100000000000000000") @Min(value = 0, message = "Incorrect value of page") Long page
     ) {
-        List<ProductDto> productDtoPage = productService.getAllProductsDto(page, size);
+        List<ProductDto> productDtoPage = productService.getAllProductsDto(page);
         return ResponseEntity.ok(productDtoPage);
     }
 

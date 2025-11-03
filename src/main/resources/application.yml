@@ -5,19 +5,30 @@ spring:
   application:
     name: products-service-redis-project
   datasource:
-    url: jdbc:postgresql://localhost:5432/Products
+    url: jdbc:postgresql://localhost:5432/Products?rewriteBatchedInserts=true
     username: postgres
     password: postgres
     hikari:
       maximum-pool-size: 20
+      auto-commit: false
   jpa:
-    show-sql:
-      true
+    show-sql: true
     hibernate:
       ddl-auto: validate
     properties:
-      hibernate.jdbc.batch_size: 100
-      hibernate.default_schema: public
+      hibernate:
+        id:
+          new_generator_mappings: true
+        jdbc.batch_size: 50
+        order_inserts: true
+        order_updates: true
+        jdbc.batch_versioned_data: true
+#        id.optimizer.pooled.preferred: pooled-lo
+#        dialect: org.hibernate.dialect.PostgreSQLDialect
+#        default_schema: public
+#        generate_statistics: true
+#        query.in_clause_parameter_padding: true
+#        jdbc.lob.non_contextual_creation: true
     open-in-view: false
   data:
     redis:
@@ -25,3 +36,11 @@ spring:
       port: 6379
   cache:
     type: redis
+
+#logging:
+#  level:
+#    org.hibernate.SQL: DEBUG
+#    org.hibernate.engine.jdbc.batch.internal.BatchingBatch: TRACE
+#    org.hibernate.jdbc: TRACE
+#    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+

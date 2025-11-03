@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
+import java.util.List;
 
 
 public record ProductCreateRequest (
@@ -20,7 +21,10 @@ public record ProductCreateRequest (
 
         @NotBlank(message = "Incorrect description")
         @Size(max = 300, message = "Description is too long")
-        String description
+        String description,
+
+        @Size(max = 3, message = "Maximum of 3 photos")
+        List<String> productPhotosUrl
 
 ) {}
 

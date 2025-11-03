@@ -11,7 +11,7 @@ public interface ProductService {
 
     ProductDto getProductDtoById(Long id);
 
-    List<ProductDto> getAllProductsDto(int page, int size);
+    List<ProductDto> getAllProductsDto(Long id);
 
     ProductDto create(ProductCreateRequest productCreateRequest);
 

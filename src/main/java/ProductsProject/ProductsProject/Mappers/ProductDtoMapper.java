@@ -29,4 +29,8 @@ public interface ProductDtoMapper {
     @Mapping(target = "photos", source = "productPhotos")
     ProductDto toProductDtoWithProductPhotos(ProductEntity productEntity);
 
+    @Mapping(target = "photoUrl", source = "url")
+    @Mapping(target = "product", source = "product")
+    ProductPhotoEntity toPhotoEntity(String url, ProductEntity product);
+
 }
