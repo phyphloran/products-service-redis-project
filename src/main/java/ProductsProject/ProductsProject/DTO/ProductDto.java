@@ -3,6 +3,7 @@ package ProductsProject.ProductsProject.DTO;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 
 
 public record ProductDto(
@@ -17,7 +18,9 @@ public record ProductDto(
 
         Instant createdAt,
 
-        Instant updatedAt
+        Instant updatedAt,
+
+        List<ProductPhotoDto> photos
 
 ) {
 }

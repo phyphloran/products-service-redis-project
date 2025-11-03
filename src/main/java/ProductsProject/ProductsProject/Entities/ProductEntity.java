@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 
 
 @Entity
@@ -18,15 +19,7 @@ import java.time.Instant;
 public class ProductEntity {
 
     @Id
-    @GeneratedValue(
-            strategy = GenerationType.SEQUENCE,
-            generator = "product_id_sequence"
-    )
-    @SequenceGenerator(
-            name = "product_id_sequence",
-            sequenceName = "product_id_sequence",
-            allocationSize = 1
-    )
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "name", nullable = false)
@@ -43,6 +36,9 @@ public class ProductEntity {
 
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt = Instant.now();
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProductPhotoEntity> productPhotos;
 
     @PreUpdate
     public void preUpdate() {

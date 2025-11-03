@@ -6,10 +6,9 @@ import ProductsProject.ProductsProject.Requests.ProductCreateRequest;
 import ProductsProject.ProductsProject.Requests.ProductUpdateRequest;
 import ProductsProject.ProductsProject.Services.ProductService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -18,20 +17,23 @@ import java.util.List;
 
 
 @Slf4j
-@RestController
-@RequiredArgsConstructor
-@RequestMapping("/api/product")
 @Validated
+@RestController
+@RequestMapping("/api/product")
 public class ProductController {
 
     private final ProductService productService;
 
+    //2 realization: productWithProductPhotosServiceImpl and productServiceImpl
+    public ProductController(@Qualifier("productWithProductPhotosServiceImpl") ProductService productService) {
+        this.productService = productService;
+    }
+
     @GetMapping
     public ResponseEntity<List<ProductDto>> getAllProducts(
-            @RequestParam(defaultValue = "0") @Min(value = 0, message = "Incorrect value of page") int page,
-            @RequestParam(defaultValue = "10") @Min(value = 1, message = "Min value must be more than 20") @Max(value = 20, message = "Max value must be less than 0") int size
+            @RequestParam(defaultValue = "100000000000000000") @Min(value = 0, message = "Incorrect value of page") Long page
     ) {
-        List<ProductDto> productDtoPage = productService.getAllProductsDto(page, size);
+        List<ProductDto> productDtoPage = productService.getAllProductsDto(page);
         return ResponseEntity.ok(productDtoPage);
     }
 
