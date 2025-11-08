@@ -19,7 +19,8 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
     @EntityGraph(attributePaths = "productPhotos", type = EntityGraph.EntityGraphType.FETCH)
     Optional<ProductEntity> findById(@Param("id") Long id);
 
-    @Query("SELECT p.id FROM ProductEntity p WHERE LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%'))")
+    @Query(value = "SELECT p.id FROM product p WHERE LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%')) ORDER BY p.id DESC",
+            nativeQuery = true)
     Page<Long> findIdsByNameContainingIgnoreCase(@Param("name") String name, Pageable pageable);
 
     @EntityGraph(attributePaths = "productPhotos")
@@ -27,6 +28,5 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
 
     @Query("SELECT p.id FROM ProductEntity p")
     Page<Long> findIdsPage(Pageable pageable);
-
 
 }

@@ -9,16 +9,16 @@ import ProductsProject.ProductsProject.Requests.ProductUpdateRequest;
 
 public interface ProductService {
 
-    ProductDto getProductDtoById(Long id);
+    ProductDto getProductById(Long id);
 
-    ProductPageDto getAllProductsDto(int page, int size);
+    ProductPageDto getProducts(int page, int size);
 
-    ProductDto create(ProductCreateRequest productCreateRequest);
+    ProductPageDto searchProductsByName(String name, int page, int size);
 
-    ProductDto update(Long id, ProductUpdateRequest productUpdateRequest);
+    ProductDto createProduct(ProductCreateRequest productCreateRequest);
 
-    void delete(Long id);
+    ProductDto updateProduct(Long id, ProductUpdateRequest productUpdateRequest);
 
-    ProductPageDto findByName(String name, int page, int size);
+    void deleteProduct(Long id);
 
 }

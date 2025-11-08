@@ -32,34 +32,33 @@ public class ProductController {
     }
 
     @GetMapping
-    public ResponseEntity<ProductPageDto> getAllProducts(
+    public ResponseEntity<ProductPageDto> getProducts(
             @RequestParam @Min(value = 0, message = "Incorrect value of page") int page,
             @RequestParam int size
     ) {
         return ResponseEntity.ok()
-                .body(productService.getAllProductsDto(page, size));
+                .body(productService.getProducts(page, size));
     }
 
     @GetMapping("/search")
-    public ResponseEntity<ProductPageDto> findByName(
+    public ResponseEntity<ProductPageDto> searchProductsByName(
             @RequestParam @NotNull(message = "Name can not be null") @NotEmpty(message = "Name can not be empty") String name,
             @RequestParam int page,
             @RequestParam int size
     ) {
         return ResponseEntity.ok()
-                .header("X-Total-Pages", "todo testValue!!!")
-                .body(productService.findByName(name, page, size));
+                .body(productService.searchProductsByName(name, page, size));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ProductDto> getProductById(@PathVariable("id") Long id) {
-        ProductDto productDto = productService.getProductDtoById(id);
+        ProductDto productDto = productService.getProductById(id);
         return ResponseEntity.ok(productDto);
     }
 
     @PostMapping
     public ResponseEntity<ProductDto> createProduct(@RequestBody @Valid ProductCreateRequest productCreateRequest) {
-        ProductDto productDto = productService.create(productCreateRequest);
+        ProductDto productDto = productService.createProduct(productCreateRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(productDto);
     }
 
@@ -68,13 +67,13 @@ public class ProductController {
             @PathVariable("id") Long id,
             @RequestBody @Valid ProductUpdateRequest productUpdateRequest
     ) {
-        ProductDto productDto = productService.update(id, productUpdateRequest);
+        ProductDto productDto = productService.updateProduct(id, productUpdateRequest);
         return ResponseEntity.ok(productDto);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProduct(@PathVariable("id") Long id) {
-        productService.delete(id);
+        productService.deleteProduct(id);
         return ResponseEntity.noContent().build();
     }
 
