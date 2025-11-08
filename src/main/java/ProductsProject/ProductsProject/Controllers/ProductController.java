@@ -2,18 +2,20 @@ package ProductsProject.ProductsProject.Controllers;
 
 
 import ProductsProject.ProductsProject.DTO.ProductDto;
+import ProductsProject.ProductsProject.DTO.ProductPageDto;
 import ProductsProject.ProductsProject.Requests.ProductCreateRequest;
 import ProductsProject.ProductsProject.Requests.ProductUpdateRequest;
 import ProductsProject.ProductsProject.Services.ProductService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
 
 
 @Slf4j
@@ -30,11 +32,23 @@ public class ProductController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ProductDto>> getAllProducts(
-            @RequestParam(defaultValue = "100000000000000000") @Min(value = 0, message = "Incorrect value of page") Long page
+    public ResponseEntity<ProductPageDto> getAllProducts(
+            @RequestParam @Min(value = 0, message = "Incorrect value of page") int page,
+            @RequestParam int size
     ) {
-        List<ProductDto> productDtoPage = productService.getAllProductsDto(page);
-        return ResponseEntity.ok(productDtoPage);
+        return ResponseEntity.ok()
+                .body(productService.getAllProductsDto(page, size));
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<ProductPageDto> findByName(
+            @RequestParam @NotNull(message = "Name can not be null") @NotEmpty(message = "Name can not be empty") String name,
+            @RequestParam int page,
+            @RequestParam int size
+    ) {
+        return ResponseEntity.ok()
+                .header("X-Total-Pages", "todo testValue!!!")
+                .body(productService.findByName(name, page, size));
     }
 
     @GetMapping("/{id}")

@@ -3,6 +3,7 @@ package ProductsProject.ProductsProject.Repositories;
 
 import ProductsProject.ProductsProject.Entities.ProductEntity;
 import io.lettuce.core.dynamic.annotation.Param;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,14 +19,14 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
     @EntityGraph(attributePaths = "productPhotos", type = EntityGraph.EntityGraphType.FETCH)
     Optional<ProductEntity> findById(@Param("id") Long id);
 
-    @Query("SELECT p.id FROM ProductEntity p WHERE p.id < :id ORDER BY p.id DESC")
-    List<Long> findProductIdsByPage(@Param("id") Long id, Pageable pageable);
+    @Query("SELECT p.id FROM ProductEntity p WHERE LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%'))")
+    Page<Long> findIdsByNameContainingIgnoreCase(@Param("name") String name, Pageable pageable);
 
     @EntityGraph(attributePaths = "productPhotos")
-    @Query("SELECT p FROM ProductEntity p WHERE p.id IN :ids ORDER BY p.id DESC")
-    List<ProductEntity> findProductsWithPhotosByIds(@Param("ids") List<Long> ids);
+    List<ProductEntity> findByIdIn(List<Long> ids);
 
-
+    @Query("SELECT p.id FROM ProductEntity p")
+    Page<Long> findIdsPage(Pageable pageable);
 
 
 }
