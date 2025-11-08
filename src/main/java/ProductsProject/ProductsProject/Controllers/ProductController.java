@@ -7,6 +7,7 @@ import ProductsProject.ProductsProject.Requests.ProductCreateRequest;
 import ProductsProject.ProductsProject.Requests.ProductUpdateRequest;
 import ProductsProject.ProductsProject.Services.ProductService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -34,7 +35,7 @@ public class ProductController {
     @GetMapping
     public ResponseEntity<ProductPageDto> getProducts(
             @RequestParam @Min(value = 0, message = "Incorrect value of page") int page,
-            @RequestParam int size
+            @RequestParam @Min(value = 1, message = "Incorrect value of size") @Max(value = 20, message = "The size cannot exceed 20") int size
     ) {
         return ResponseEntity.ok()
                 .body(productService.getProducts(page, size));
@@ -43,8 +44,8 @@ public class ProductController {
     @GetMapping("/search")
     public ResponseEntity<ProductPageDto> searchProductsByName(
             @RequestParam @NotNull(message = "Name can not be null") @NotEmpty(message = "Name can not be empty") String name,
-            @RequestParam int page,
-            @RequestParam int size
+            @RequestParam @Min(value = 0, message = "Incorrect value of page") int page,
+            @RequestParam @Min(value = 1, message = "Incorrect value of size") @Max(value = 20, message = "The size cannot exceed 20") int size
     ) {
         return ResponseEntity.ok()
                 .body(productService.searchProductsByName(name, page, size));
@@ -53,7 +54,7 @@ public class ProductController {
     @GetMapping("/{id}")
     public ResponseEntity<ProductDto> getProductById(@PathVariable("id") Long id) {
         ProductDto productDto = productService.getProductById(id);
-        return ResponseEntity.ok(productDto);
+        return ResponseEntity.ok().body(productDto);
     }
 
     @PostMapping
@@ -68,7 +69,7 @@ public class ProductController {
             @RequestBody @Valid ProductUpdateRequest productUpdateRequest
     ) {
         ProductDto productDto = productService.updateProduct(id, productUpdateRequest);
-        return ResponseEntity.ok(productDto);
+        return ResponseEntity.ok().body(productDto);
     }
 
     @DeleteMapping("/{id}")
