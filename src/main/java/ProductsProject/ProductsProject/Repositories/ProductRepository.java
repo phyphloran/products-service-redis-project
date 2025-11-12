@@ -26,7 +26,7 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
     @EntityGraph(attributePaths = "productPhotos")
     List<ProductEntity> findByIdIn(List<Long> ids);
 
-    @Query("SELECT p.id FROM ProductEntity p")
+    @Query("SELECT p.id FROM ProductEntity p ORDER BY p.id DESC")
     Page<Long> findIdsPage(Pageable pageable);
 
 }
