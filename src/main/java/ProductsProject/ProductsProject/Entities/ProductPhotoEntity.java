@@ -9,22 +9,28 @@ import lombok.*;
 @Getter
 @Setter
 @Builder
-@ToString
-@EqualsAndHashCode
+@ToString(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "product_photo")
 public class ProductPhotoEntity {
 
     @Id
+    @ToString.Include
+    @EqualsAndHashCode.Include
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "photo_url")
+    @ToString.Include
+    @EqualsAndHashCode.Include
+    @Column(name = "photo_url", nullable = false)
     private String photoUrl;
 
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @JoinColumn(name = "product_id", nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id")
     private ProductEntity product;
 
 }

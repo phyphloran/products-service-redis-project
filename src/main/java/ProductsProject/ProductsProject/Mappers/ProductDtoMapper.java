@@ -21,7 +21,6 @@ public interface ProductDtoMapper {
 
     ProductDto toProductDto(ProductEntity productEntity);
 
-    @Mapping(target = "product_id", source = "product.id")
     ProductPhotoDto toProductPhotoDto(ProductPhotoEntity productPhotoEntity);
 
     @Mapping(target = "photos", source = "productPhotos")
