@@ -39,7 +39,7 @@ public class ProductWithProductPhotosServiceImpl implements ProductService {
     }
 
     @Override
-//    @Cacheable(value = "product", key = "#id", cacheManager = "product")
+    @Cacheable(value = "product", key = "#id", cacheManager = "product")
     public ProductDto getProductById(Long id) {
         return productDtoMapper.toProductDtoWithProductPhotos(getById(id));
     }
