@@ -20,7 +20,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 
@@ -40,7 +39,7 @@ public class ProductWithProductPhotosServiceImpl implements ProductService {
     }
 
     @Override
-    @Cacheable(value = "product", key = "#id", cacheManager = "product")
+//    @Cacheable(value = "product", key = "#id", cacheManager = "product")
     public ProductDto getProductById(Long id) {
         return productDtoMapper.toProductDtoWithProductPhotos(getById(id));
     }
@@ -93,24 +92,53 @@ public class ProductWithProductPhotosServiceImpl implements ProductService {
     })
     public ProductDto updateProduct(Long id, ProductUpdateRequest productUpdateRequest) {
         ProductEntity productEntity = getById(id);
-
-        productEntity.setName(productUpdateRequest.name());
-        productEntity.setPrice(productUpdateRequest.price());
-        productEntity.setDescription(productUpdateRequest.description());
-
-        List<ProductPhotoEntity> productPhotoEntity = productEntity.getProductPhotos();
-        Map<Long, String> newMap = productUpdateRequest.photoToUpdateMap();
-
-        if (newMap != null && !newMap.isEmpty()) {
-            productPhotoEntity.forEach(photo -> {
-                String newUrl = newMap.get(photo.getId());
-                if (newUrl != null && !newUrl.isBlank()) {
-                    photo.setPhotoUrl(newUrl);
-                }
-            });
-        }
-
+        updateProductFields(productEntity, productUpdateRequest);
+        updateProductPhotos(productEntity, productUpdateRequest);
         return productDtoMapper.toProductDtoWithProductPhotos(productRepository.save(productEntity));
+    }
+
+    private void updateProductFields(ProductEntity productEntity, ProductUpdateRequest productUpdateRequest) {
+        if (productUpdateRequest.name() != null && !productUpdateRequest.name().isBlank()) {
+            productEntity.setName(productUpdateRequest.name());
+        }
+        if (productUpdateRequest.price() != null) {
+            productEntity.setPrice(productUpdateRequest.price());
+        }
+        if (productUpdateRequest.description() != null && !productUpdateRequest.description().isBlank()) {
+            productEntity.setDescription(productUpdateRequest.description());
+        }
+    }
+
+    private void updateProductPhotos(ProductEntity product, ProductUpdateRequest request) {
+        List<ProductPhotoEntity> existingPhotos = product.getProductPhotos();
+        List<String> newUrls = request.newPhotoUrls();
+        if (newUrls == null) {
+            return;
+        }
+        updateExistingPhotos(existingPhotos, newUrls);
+        if (existingPhotos.size() > newUrls.size()) {
+            existingPhotos.subList(newUrls.size(), existingPhotos.size()).clear();
+        }
+        else if (existingPhotos.size() < newUrls.size()) {
+            for (int i = existingPhotos.size(); i < newUrls.size(); i++) {
+                if (newUrls.get(i) != null && !newUrls.get(i).isBlank()) {
+                    ProductPhotoEntity newPhoto = ProductPhotoEntity.builder()
+                            .photoUrl(newUrls.get(i))
+                            .product(product)
+                            .build();
+                    existingPhotos.add(newPhoto);
+                }
+            }
+        }
+    }
+
+    private void updateExistingPhotos(List<ProductPhotoEntity> existingPhotos, List<String> newUrls) {
+        int minSize = Math.min(existingPhotos.size(), newUrls.size());
+        for (int i = 0; i < minSize; i++) {
+            if (newUrls.get(i) != null && !newUrls.get(i).isBlank()) {
+                existingPhotos.get(i).setPhotoUrl(newUrls.get(i));
+            }
+        }
     }
 
     @Override
