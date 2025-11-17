@@ -67,7 +67,7 @@ public class ProductWithProductPhotosServiceImpl implements ProductService {
     @Override
     @Transactional
     @Caching(evict = {
-            @CacheEvict(value = "productsPageSearch", allEntries = true, cacheManager = "productsPage"),
+//            @CacheEvict(value = "productsPageSearch", allEntries = true, cacheManager = "productsPage"),
             @CacheEvict(value = "productsPage", allEntries = true, cacheManager = "productsPage")
     })
     public ProductDto createProduct(ProductCreateRequest productCreateRequest) {
@@ -93,7 +93,7 @@ public class ProductWithProductPhotosServiceImpl implements ProductService {
     @Transactional
     @Caching(evict = {
             @CacheEvict(value = "product", key = "#id", cacheManager = "product"),
-            @CacheEvict(value = "productsPageSearch", allEntries = true, cacheManager = "productsPage"),
+//            @CacheEvict(value = "productsPageSearch", allEntries = true, cacheManager = "productsPage"),
             @CacheEvict(value = "productsPage", allEntries = true, cacheManager = "productsPage")
     })
     public ProductDto updateProduct(Long id, ProductUpdateRequest productUpdateRequest) {
@@ -101,6 +101,41 @@ public class ProductWithProductPhotosServiceImpl implements ProductService {
         updateProductFields(productEntity, productUpdateRequest);
         updateProductPhotos(productEntity, productUpdateRequest);
         return productDtoMapper.toProductDtoWithProductPhotos(productRepository.save(productEntity));
+    }
+
+    @Override
+//    @Cacheable(value = "productsPageSearch", key = "'name_' + #name + '_page_' + #page + '_size_' + #size", cacheManager = "productsPage")
+    public ProductPageDto searchProductsByName(String name, int page, int size) {
+        Page<Long> productEntityPage = productRepository.findIdsByNameContainingIgnoreCase(name, PageRequest.of(page, size));
+
+        List<ProductDto> productDtoList = productRepository.findByIdIn(productEntityPage.getContent(), Sort.by(Sort.Direction.DESC, "id")).stream()
+                .map(productEntity -> productDtoMapper.toProductDtoWithProductPhotos(productEntity))
+                .collect(Collectors.toList());
+
+        return new ProductPageDto(
+                productDtoList,
+                getPaginationInfo(productEntityPage)
+        );
+    }
+
+    @Override
+    @Transactional
+    @Caching(evict = {
+            @CacheEvict(value = "product", key = "#id", cacheManager = "product"),
+//            @CacheEvict(value = "productsPageSearch", allEntries = true, cacheManager = "productsPage"),
+            @CacheEvict(value = "productsPage", allEntries = true, cacheManager = "productsPage")
+    })
+    public void deleteProduct(Long id) {
+        productRepository.deleteById(id);
+    }
+
+    private void updateExistingPhotos(List<ProductPhotoEntity> existingPhotos, List<String> newUrls) {
+        int minSize = Math.min(existingPhotos.size(), newUrls.size());
+        for (int i = 0; i < minSize; i++) {
+            if (newUrls.get(i) != null && !newUrls.get(i).isBlank()) {
+                existingPhotos.get(i).setPhotoUrl(newUrls.get(i));
+            }
+        }
     }
 
     private void updateProductFields(ProductEntity productEntity, ProductUpdateRequest productUpdateRequest) {
@@ -136,41 +171,6 @@ public class ProductWithProductPhotosServiceImpl implements ProductService {
                 }
             }
         }
-    }
-
-    private void updateExistingPhotos(List<ProductPhotoEntity> existingPhotos, List<String> newUrls) {
-        int minSize = Math.min(existingPhotos.size(), newUrls.size());
-        for (int i = 0; i < minSize; i++) {
-            if (newUrls.get(i) != null && !newUrls.get(i).isBlank()) {
-                existingPhotos.get(i).setPhotoUrl(newUrls.get(i));
-            }
-        }
-    }
-
-    @Override
-    @Cacheable(value = "productsPageSearch", key = "'name_' + #name + '_page_' + #page + '_size_' + #size", cacheManager = "productsPage")
-    public ProductPageDto searchProductsByName(String name, int page, int size) {
-        Page<Long> productEntityPage = productRepository.findIdsByNameContainingIgnoreCase(name, PageRequest.of(page, size));
-
-        List<ProductDto> productDtoList = productRepository.findByIdIn(productEntityPage.getContent(), Sort.by(Sort.Direction.DESC, "id")).stream()
-                .map(productEntity -> productDtoMapper.toProductDtoWithProductPhotos(productEntity))
-                .collect(Collectors.toList());
-
-        return new ProductPageDto(
-                productDtoList,
-                getPaginationInfo(productEntityPage)
-        );
-    }
-
-    @Override
-    @Transactional
-    @Caching(evict = {
-            @CacheEvict(value = "product", key = "#id", cacheManager = "product"),
-            @CacheEvict(value = "productsPageSearch", allEntries = true, cacheManager = "productsPage"),
-            @CacheEvict(value = "productsPage", allEntries = true, cacheManager = "productsPage")
-    })
-    public void deleteProduct(Long id) {
-        productRepository.deleteById(id);
     }
 
 }
