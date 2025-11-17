@@ -1,6 +1,7 @@
 package ProductsProject.ProductsProject.Services;
 
 
+import ProductsProject.ProductsProject.DTO.PaginationDto;
 import ProductsProject.ProductsProject.DTO.ProductDto;
 import ProductsProject.ProductsProject.DTO.ProductPageDto;
 import ProductsProject.ProductsProject.Entities.ProductEntity;
@@ -17,8 +18,8 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -49,16 +50,18 @@ public class ProductWithProductPhotosServiceImpl implements ProductService {
     public ProductPageDto getProducts(int page, int size) {
         Page<Long> productEntityPage = productRepository.findIdsPage(PageRequest.of(page, size));
 
-        long totalElements = productEntityPage.getTotalElements();
-
-        List<Long> ids = productEntityPage.getContent();
-
-        List<ProductDto> productDtoList = productRepository.findByIdIn(ids).stream()
-                .sorted(Comparator.comparing(ProductEntity::getId).reversed())
+        List<ProductDto> productDtoList = productRepository.findByIdIn(productEntityPage.getContent(), Sort.by(Sort.Direction.DESC, "id")).stream()
                 .map(productEntity -> productDtoMapper.toProductDtoWithProductPhotos(productEntity))
                 .collect(Collectors.toList());
 
-        return new ProductPageDto(productDtoList, totalElements);
+        return new ProductPageDto(
+                productDtoList,
+                getPaginationInfo(productEntityPage)
+        );
+    }
+
+    private PaginationDto getPaginationInfo(Page<Long> productEntityPage) {
+        return new PaginationDto(productEntityPage.getTotalPages(), productEntityPage.getNumber());
     }
 
     @Override
@@ -73,12 +76,15 @@ public class ProductWithProductPhotosServiceImpl implements ProductService {
         productEntity.setPrice(productCreateRequest.price());
         productEntity.setDescription(productCreateRequest.description());
 
-        List<ProductPhotoEntity> photos = productCreateRequest.productPhotosUrl()
-                .stream()
-                .map(url -> productDtoMapper.toPhotoEntity(url, productEntity))
-                .collect(Collectors.toList());
+        if (productCreateRequest.productPhotosUrl() != null) {
 
-        productEntity.setProductPhotos(photos);
+            List<ProductPhotoEntity> photos = productCreateRequest.productPhotosUrl()
+                    .stream()
+                    .map(url -> productDtoMapper.toPhotoEntity(url, productEntity))
+                    .collect(Collectors.toList());
+
+            productEntity.setProductPhotos(photos);
+        }
 
         return productDtoMapper.toProductDtoWithProductPhotos(productRepository.save(productEntity));
     }
@@ -146,16 +152,14 @@ public class ProductWithProductPhotosServiceImpl implements ProductService {
     public ProductPageDto searchProductsByName(String name, int page, int size) {
         Page<Long> productEntityPage = productRepository.findIdsByNameContainingIgnoreCase(name, PageRequest.of(page, size));
 
-        long totalElements = productEntityPage.getTotalElements();
-
-        List<Long> ids = productEntityPage.getContent();
-
-        List<ProductDto> productDtoList = productRepository.findByIdIn(ids).stream()
-                .sorted(Comparator.comparing(ProductEntity::getId).reversed())
+        List<ProductDto> productDtoList = productRepository.findByIdIn(productEntityPage.getContent(), Sort.by(Sort.Direction.DESC, "id")).stream()
                 .map(productEntity -> productDtoMapper.toProductDtoWithProductPhotos(productEntity))
                 .collect(Collectors.toList());
 
-        return new ProductPageDto(productDtoList, totalElements);
+        return new ProductPageDto(
+                productDtoList,
+                getPaginationInfo(productEntityPage)
+        );
     }
 
     @Override

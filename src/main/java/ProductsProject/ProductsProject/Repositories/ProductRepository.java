@@ -5,6 +5,7 @@ import ProductsProject.ProductsProject.Entities.ProductEntity;
 import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -24,7 +25,7 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
     Page<Long> findIdsByNameContainingIgnoreCase(@Param("name") String name, Pageable pageable);
 
     @EntityGraph(attributePaths = "productPhotos")
-    List<ProductEntity> findByIdIn(List<Long> ids);
+    List<ProductEntity> findByIdIn(List<Long> ids, Sort sort);
 
     @Query("SELECT p.id FROM ProductEntity p ORDER BY p.id DESC")
     Page<Long> findIdsPage(Pageable pageable);
