@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @Validated
 @RestController
-@RequestMapping("/api/product")
+@RequestMapping("/api/v1/products")
 public class ProductController {
 
     private final ProductService productService;
