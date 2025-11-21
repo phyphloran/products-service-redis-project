@@ -20,8 +20,8 @@ public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
     @EntityGraph(attributePaths = "productPhotos", type = EntityGraph.EntityGraphType.FETCH)
     Optional<ProductEntity> findById(@Param("id") Long id);
 
-    @Query(value = "SELECT p.id FROM product p WHERE LOWER(p.name) LIKE LOWER(CONCAT('%', :name, '%')) ORDER BY p.id DESC",
-            nativeQuery = true)
+    // Навешен GIN индекс на поле name: CREATE INDEX idx_gin_trgm_name ON product USING GIN (name gin_trgm_ops);
+    @Query("SELECT p.id FROM ProductEntity p WHERE p.name ILIKE %:name%")
     Page<Long> findIdsByNameContainingIgnoreCase(@Param("name") String name, Pageable pageable);
 
     @EntityGraph(attributePaths = "productPhotos")
