@@ -17,7 +17,7 @@ import java.util.Optional;
 @Repository
 public interface ProductRepository extends JpaRepository<ProductEntity, Long> {
 
-    @EntityGraph(attributePaths = "productPhotos", type = EntityGraph.EntityGraphType.FETCH)
+    @EntityGraph(attributePaths = "productPhotos")
     Optional<ProductEntity> findById(@Param("id") Long id);
 
     // Навешен GIN индекс на поле name: CREATE INDEX idx_gin_trgm_name ON product USING GIN (name gin_trgm_ops);
