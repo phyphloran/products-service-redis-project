@@ -11,8 +11,8 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -22,15 +22,11 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @Validated
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/v1/products")
 public class ProductController {
 
     private final ProductService productService;
-
-    //2 realization: productWithProductPhotosServiceImpl and productServiceImpl
-    public ProductController(@Qualifier("productWithProductPhotosServiceImpl") ProductService productService) {
-        this.productService = productService;
-    }
 
     @GetMapping
     public ResponseEntity<ProductPageDto> getProducts(
@@ -63,7 +59,7 @@ public class ProductController {
         return ResponseEntity.status(HttpStatus.CREATED).body(productDto);
     }
 
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     public ResponseEntity<ProductDto> updateProduct(
             @PathVariable("id") Long id,
             @RequestBody @Valid ProductUpdateRequest productUpdateRequest
@@ -73,7 +69,7 @@ public class ProductController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteProduct(@PathVariable("id") Long id) {
+    public ResponseEntity<Void> deleteProduct(@PathVariable("id") @Min(value = 1, message = "Incorrect id") Long id) {
         productService.deleteProduct(id);
         return ResponseEntity.noContent().build();
     }

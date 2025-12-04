@@ -15,7 +15,7 @@ import org.mapstruct.ReportingPolicy;
         unmappedTargetPolicy = ReportingPolicy.IGNORE,
         componentModel = MappingConstants.ComponentModel.SPRING
 )
-public interface ProductDtoMapper {
+public interface ProductMapper {
 
     ProductEntity toEntity(ProductDto productDto);
 
@@ -29,6 +29,5 @@ public interface ProductDtoMapper {
     @Mapping(target = "photoUrl", source = "url")
     @Mapping(target = "product", source = "product")
     ProductPhotoEntity toPhotoEntity(String url, ProductEntity product);
-
 
 }

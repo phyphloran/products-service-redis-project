@@ -24,7 +24,7 @@ public record ProductCreateRequest (
         String description,
 
         @Size(max = 3, message = "Maximum of 3 photos")
-        List<String> productPhotosUrl
+        List<@NotBlank(message = "photo can not be empty") String> productPhotosUrl
 
 ) {}
 

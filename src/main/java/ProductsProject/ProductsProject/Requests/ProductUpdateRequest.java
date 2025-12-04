@@ -2,6 +2,7 @@ package ProductsProject.ProductsProject.Requests;
 
 
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.util.List;
@@ -19,6 +20,6 @@ public record ProductUpdateRequest (
     String description,
 
     @Size(max = 3, message = "Maximum of 3 photos")
-    List<String> newPhotoUrls
+    List<@NotBlank(message = "photo can not be empty") String> newPhotoUrls
 
 ) {}

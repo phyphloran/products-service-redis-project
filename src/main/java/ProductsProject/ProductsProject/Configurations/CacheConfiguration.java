@@ -20,25 +20,6 @@ import java.time.Duration;
 @Configuration
 public class CacheConfiguration {
 
-    @Bean(name = "product")
-    public CacheManager productCacheManager(
-            RedisConnectionFactory connectionFactory,
-            ObjectMapper objectMapper
-    ) {
-        var jsonSerializer = new Jackson2JsonRedisSerializer<>(objectMapper, ProductDto.class);
-
-        RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
-                .entryTtl(Duration.ofMinutes(1))
-                .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
-                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(jsonSerializer));
-
-        return RedisCacheManager.builder(connectionFactory)
-                .cacheDefaults(config)
-                .transactionAware()
-                .build();
-    }
-
-
     @Primary
     @Bean(name = "productsPage")
     public CacheManager productsPageCacheManager(
@@ -58,29 +39,22 @@ public class CacheConfiguration {
                 .build();
     }
 
-    /*@Primary
-    @Bean(name = "products")
-    public CacheManager productsCacheManager(
+    /*@Bean(name = "product")
+    public CacheManager productCacheManager(
             RedisConnectionFactory connectionFactory,
             ObjectMapper objectMapper
     ) {
-        JavaType type = objectMapper.getTypeFactory()
-                .constructCollectionType(List.class, ProductDto.class);
-
-        Jackson2JsonRedisSerializer<List<ProductDto>> serializer =
-                new Jackson2JsonRedisSerializer<>(objectMapper, type);
+        var jsonSerializer = new Jackson2JsonRedisSerializer<>(objectMapper, ProductDto.class);
 
         RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
                 .entryTtl(Duration.ofMinutes(1))
                 .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
-                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(serializer));
+                .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(jsonSerializer));
 
         return RedisCacheManager.builder(connectionFactory)
                 .cacheDefaults(config)
                 .transactionAware()
                 .build();
     }*/
-
-
 
 }
