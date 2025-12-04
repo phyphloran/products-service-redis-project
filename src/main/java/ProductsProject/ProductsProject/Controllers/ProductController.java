@@ -31,32 +31,31 @@ public class ProductController {
     @GetMapping
     public ResponseEntity<ProductPageDto> getProducts(
             @RequestParam @Min(value = 0, message = "Incorrect value of page") int page,
-            @RequestParam @Min(value = 1, message = "Incorrect value of size") @Max(value = 20, message = "The size cannot exceed 20") int size
+            @RequestParam @Min(value = 1, message = "Incorrect value of size")
+            @Max(value = 20, message = "The size cannot exceed 20") int size
     ) {
-        return ResponseEntity.ok()
-                .body(productService.getProducts(page, size));
+        return ResponseEntity.ok().body(productService.getProducts(page, size));
     }
 
     @GetMapping("/search")
     public ResponseEntity<ProductPageDto> searchProductsByName(
-            @RequestParam @NotNull(message = "Name can not be null") @NotEmpty(message = "Name can not be empty") String name,
+            @RequestParam @NotNull(message = "Name can not be null")
+            @NotEmpty(message = "Name can not be empty") String name,
             @RequestParam @Min(value = 0, message = "Incorrect value of page") int page,
-            @RequestParam @Min(value = 1, message = "Incorrect value of size") @Max(value = 20, message = "The size cannot exceed 20") int size
+            @RequestParam @Min(value = 1, message = "Incorrect value of size")
+            @Max(value = 20, message = "The size cannot exceed 20") int size
     ) {
-        return ResponseEntity.ok()
-                .body(productService.searchProductsByName(name, page, size));
+        return ResponseEntity.ok().body(productService.searchProductsByName(name, page, size));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ProductDto> getProductById(@PathVariable("id") Long id) {
-        ProductDto productDto = productService.getProductById(id);
-        return ResponseEntity.ok().body(productDto);
+        return ResponseEntity.ok().body(productService.getProductById(id));
     }
 
     @PostMapping
     public ResponseEntity<ProductDto> createProduct(@RequestBody @Valid ProductCreateRequest productCreateRequest) {
-        ProductDto productDto = productService.createProduct(productCreateRequest);
-        return ResponseEntity.status(HttpStatus.CREATED).body(productDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(productService.createProduct(productCreateRequest));
     }
 
     @PatchMapping("/{id}")
@@ -64,8 +63,7 @@ public class ProductController {
             @PathVariable("id") Long id,
             @RequestBody @Valid ProductUpdateRequest productUpdateRequest
     ) {
-        ProductDto productDto = productService.updateProduct(id, productUpdateRequest);
-        return ResponseEntity.ok().body(productDto);
+        return ResponseEntity.ok().body(productService.updateProduct(id, productUpdateRequest));
     }
 
     @DeleteMapping("/{id}")
