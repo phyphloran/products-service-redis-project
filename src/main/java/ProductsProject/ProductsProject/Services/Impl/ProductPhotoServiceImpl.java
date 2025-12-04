@@ -46,10 +46,7 @@ public class ProductPhotoServiceImpl implements ProductPhotoService {
         else if (existingPhotos.size() < newUrls.size()) {
             for (int i = existingPhotos.size(); i < newUrls.size(); i++) {
                 if (newUrls.get(i) != null && !newUrls.get(i).isBlank()) {
-                    ProductPhotoEntity newPhoto = ProductPhotoEntity.builder()
-                            .photoUrl(newUrls.get(i))
-                            .product(product)
-                            .build();
+                    ProductPhotoEntity newPhoto = createProduct(product, newUrls.get(i));
                     existingPhotos.add(newPhoto);
                 }
             }
@@ -64,4 +61,12 @@ public class ProductPhotoServiceImpl implements ProductPhotoService {
             }
         }
     }
+
+    private ProductPhotoEntity createProduct(ProductEntity product, String newUrl) {
+        return ProductPhotoEntity.builder()
+                .photoUrl(newUrl)
+                .product(product)
+                .build();
+    }
+
 }
